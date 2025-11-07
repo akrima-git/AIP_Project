@@ -92,6 +92,7 @@ def traversal(grid, start, goal):
 
     motion = getMotion()
     # Initialise set for visited nodes, and queue for the seen nodes to be visited
+    visitedList = []
     visited = set()
     queue = deque()
     queue.append((start, [start]))
@@ -99,30 +100,31 @@ def traversal(grid, start, goal):
     while queue:
         (y,x), path = queue.popleft()
         if (y,x) == goal:
-            return path, visited
+            return path, visited, visitedList
 
         for dy, dx in motion:
             ny, nx = y + dy, x + dx
 
             if 0 <= ny < grid.shape[0] and 0 <= nx < grid.shape[1]:
                 if grid[ny,nx] == 0 and (ny,nx) not in visited:
+                    visitedList.append((ny,nx))
                     visited.add((ny,nx))
                     queue.append(((ny, nx), path + [(ny, nx)]))
-    return None, visited
+    return None, visited, visitedList
 
 grid = generate_random_map(width,height,prob,border)
 
 map_traversed = grid.copy()
 start_time = time.time()
-path, visited = traversal(grid, start, goal)
+path, visited, visitedList = traversal(grid, start, goal)
 end_time = time.time()
 
 
-colours = ["white","darkgrey","blue","red","green","cyan"]
+
 # 0 = free, 1 = wall, 2 = visited, 3 = start, 4 = goal, 5 = path
 
 
-cmap = ListedColormap(colours)
+cmap = ListedColormap(["white","darkgrey","blue","red","green","cyan"])
 print(path)
 print("Time elapsed",end_time-start_time,"second(s)")
 
@@ -136,10 +138,21 @@ map_traversed[Gy, Gx] = 4
 if path is None:
     print("No path found")
 else:
+    for vy, vx in visitedList:
+        if (vy,vx) != (Sy,Sx) and (vy,vx) != (Gy,Gx):
+            map_traversed[vy,vx] = 2
+            ax.clear()
+            print("Unique values in map:", np.unique(map_traversed))
+
+            ax.imshow(map_traversed, cmap=cmap, vmin=0, vmax=5)
+            plt.title("Visited tiles")
+            plt.pause(0.1)
 
     for py, px in path[1:-1]:
         map_traversed[py, px] = 5
         ax.clear()
+        print("Unique values in map:", np.unique(map_traversed))
+
         ax.imshow(map_traversed, cmap=cmap)
         plt.title("Final Path")
         plt.pause(0.2)

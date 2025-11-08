@@ -11,7 +11,6 @@ with open("MapAssignment.json") as file:
     config = json.load(file)
 
 
-
 width = config["map_width"]
 height = config["map_height"]
 prob = config["obstacle_probability"]
@@ -19,16 +18,9 @@ border = config["border_walls"]
 seed = config.get("seed", None)
 distance = config.get("distance",(width + height)/4)
 
-
-
 Sy = random.randint(1,height-2)
 Sx = random.randint(1,width-2)
-
-
-
-
 start = (Sy,Sx)
-
 while True:
     Gy = random.randint(1,width-2)
     Gx = random.randint(1,height-2)
@@ -39,7 +31,6 @@ while True:
     else:
         goal = (Gy, Gx)
         break
-
 
 def generate_random_map(width, height, obstacle_prob, border=True, seed=None):
     if seed is not None:
@@ -110,20 +101,15 @@ def traversal(grid, start, goal):
                     visitedList.append((ny,nx))
                     visited.add((ny,nx))
                     queue.append(((ny, nx), path + [(ny, nx)]))
+
     return None, visited, visitedList
 
 grid = generate_random_map(width,height,prob,border)
-
-map_traversed = grid.copy()
 start_time = time.time()
 path, visited, visitedList = traversal(grid, start, goal)
 end_time = time.time()
 
-
-
 # 0 = free, 1 = wall, 2 = visited, 3 = start, 4 = goal, 5 = path
-
-
 cmap = ListedColormap(["white","darkgrey","blue","red","green","cyan"])
 print(path)
 print("Time elapsed",end_time-start_time,"second(s)")
@@ -132,25 +118,25 @@ print("Time elapsed",end_time-start_time,"second(s)")
 
 plt.ion()
 fig, ax = plt.subplots()
-map_traversed[start] = 3
-map_traversed[goal] = 4
+grid[start] = 3
+grid[goal] = 4
 
 if path is None:
     print("No path found")
 else:
     for vy, vx in visitedList:
         if (vy,vx) != start and (vy,vx) != goal:
-            map_traversed[vy,vx] = 2
+            grid[vy,vx] = 2
             ax.clear()
-            ax.imshow(map_traversed, cmap=cmap, vmin=0, vmax=5)
-            plt.title("Visited tiles")
+            ax.imshow(grid, cmap=cmap, vmin=0, vmax=5)
+            plt.title(f"Visited tiles ({len(visited)})")
             plt.pause(0.1)
 
     for py, px in path[1:-1]:
-        map_traversed[py, px] = 5
+        grid[py, px] = 5
         ax.clear()
-        ax.imshow(map_traversed, cmap=cmap)
-        plt.title("Final Path")
+        ax.imshow(grid, cmap=cmap)
+        plt.title(f"Final Path ({len(path)})")
         plt.pause(0.2)
 
 
